@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../model/user.model");
 
 // zod userSchema
-const userSchema = z.object({
+const signupSchema = z.object({
   firstName: z
     .string()
     .max(50, "first name must not exceed 50 characters")
@@ -27,7 +27,6 @@ const userSchema = z.object({
     .string()
     .email()
     .trim()
-    .lowercase()
     .min(3, "Username must be at least 3 characters")
     .max(30, "Username must not exceed 30 characters")
     .nonempty("Username is required"),
@@ -36,7 +35,7 @@ const userSchema = z.object({
 // route for sign up
 router.post("/signup", async (req, res) => {
   try {
-    const { success } = userSchema.safeParse(req.body);
+    const { success } = signupSchema.safeParse(req.body);
     if (!success) {
       return res.status(411).json({
         success: false,
@@ -70,7 +69,7 @@ router.post("/signup", async (req, res) => {
 
     const token = jwt.sign({ userId }, process.env.JWT_SECRET);
 
-    res.status(200).json({
+    res.status(201).json({
       success: true,
       message: "User craeted sucessfully",
       token,
@@ -84,10 +83,25 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+const signinSchema = z.object({
+    userName: z
+      .string()
+      .email()
+      .trim()
+      .min(3, "Username must be at least 3 characters")
+      .max(30, "Username must not exceed 30 characters")
+      .nonempty("Username is required"),
+    password: z
+      .string()
+      .min(6, "Password must be at least 6 characters")
+      .max(50, "Password must not exceed 50 characters")
+      .nonempty("Password is required"),
+  });
+
 // route for signin
 router.post("/signin", async (req, res) => {
   try {
-    const success = userSchema.safeParse(req.body);
+    const success = signinSchema.safeParse(req.body);
     if (!success) {
       return res.status(401).json({
         success: false,
