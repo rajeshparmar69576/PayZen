@@ -5,6 +5,7 @@ const { z } = require("zod");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../model/user.model");
+const { AuthMiddleware } = require("../middleware/auth.middleware.js");
 
 // zod userSchema
 const signupSchema = z.object({
@@ -147,5 +148,74 @@ router.post("/signin", async (req, res) => {
     });
   }
 });
+
+
+const updateSchema = z.object({
+  firstName: z
+    .string()
+    .max(50, "first name must not exceed 50 characters")
+    .trim()
+    .nonempty("FisrtName is required"),
+  lastName: z
+    .string()
+    .max(50, "last name must not exceed 50 characters")
+    .trim()
+    .optional(),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .max(50, "Password must not exceed 50 characters")
+    .nonempty("Password is required")
+});
+
+router.put('/',AuthMiddleware,async(req,res)=>{
+  try{
+
+    const {success} = updateSchema.safeParse(req.body)
+
+    if(!success){
+      return res.status(401).json({
+        success: false,
+        message: "Incorrect inputs",
+      });
+    }
+
+
+    const userId = req.userId
+    
+    const {firstName,lastName,password} = req.body;
+
+    let updatedData = {firstName,lastName}
+
+    if(password){
+      // hash the password
+      const salt = await bcrypt.genSalt(10)
+      const hahsedPassword = await bcrypt.hash(password,salt)
+      updatedData.password = hahsedPassword
+    }
+
+  
+    const updatedUser = await User.findByIdAndUpdate(userId,updatedData,{new:true})
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    res.status(200).json({
+      success:true,
+      message:'Data updated sucessfully',
+      updatedData:updatedUser
+    })
+  }catch(err){
+    console.error("Error while updating data:", err.message);
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+})
 
 module.exports = router;
