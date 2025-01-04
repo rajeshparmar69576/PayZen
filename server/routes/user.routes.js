@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../model/user.model");
 const { AuthMiddleware } = require("../middleware/auth.middleware.js");
+const { Account } = require("../model/account.model.js");
 
 // zod userSchema
 const signupSchema = z.object({
@@ -67,6 +68,12 @@ router.post("/signup", async (req, res) => {
     });
 
     const userId = newUser._id;
+
+    // ----- Create new Account -------------------------
+    await Account.create({
+      userId,
+      balance:1+Math.random()*10000 // initialize it with random balance
+    })
 
     const token = jwt.sign({ userId }, process.env.JWT_SECRET);
 
