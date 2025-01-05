@@ -1,8 +1,15 @@
 import React from 'react'
+import AppBar from '../components/AppBar'
+import Balance from '../components/balance'
+import Users from '../components/Users'
 
 const Dashboard = () => {
   return (
-    <div>Dashboard</div>
+    <div>
+      <AppBar/>
+      <Balance/>
+      <Users/>
+    </div>
   )
 }
 
