@@ -29,7 +29,6 @@ const signupSchema = z.object({
     .string()
     .email()
     .trim()
-    .min(3, "Username must be at least 3 characters")
     .max(30, "Username must not exceed 30 characters")
     .nonempty("Username is required"),
 });
@@ -96,7 +95,6 @@ const signinSchema = z.object({
       .string()
       .email()
       .trim()
-      .min(3, "Username must be at least 3 characters")
       .max(30, "Username must not exceed 30 characters")
       .nonempty("Username is required"),
     password: z
