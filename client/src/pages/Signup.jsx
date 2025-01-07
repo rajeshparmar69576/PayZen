@@ -49,7 +49,7 @@ const Signup = () => {
             }} label={"Sign up"} />
           </div>
           <BottomWarning
-            to={"/signin"}
+            to={"/"}
             label="Already have an account?"
             toText="Sign in"
           />

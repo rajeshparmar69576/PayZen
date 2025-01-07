@@ -3,8 +3,15 @@ import SubHeading from "../components/SubHeading";
 import InputBox from "../components/InputBox";
 import ButtonComponent from "../components/ButtonComponent";
 import BottomWarning from "../components/BottomWarning";
+import {useState} from 'react'
+import axios from 'axios'
+import {useNavigate} from 'react-router-dom'
 
 const Signin = () => {
+  const navigate = useNavigate()
+  const [userName,setUserName] = useState("")
+  const [password,setPassword] = useState("") 
+
   return (
     <div className="bg-slate-300 h-screen flex justify-center">
       <div className="flex flex-col justify-center">
@@ -15,10 +22,27 @@ const Signin = () => {
             type="input"
             label="Email"
             placeholder="johndoe@example.com"
+            value={userName}
+            onChange={(e)=>{
+              setUserName(e.target.value)
+            }}
           />
-          <InputBox type="password" label="Password" />
+          <InputBox 
+            type="password"   
+            label="Password" 
+            value={password}
+            onChange={(e)=>{
+              setPassword(e.target.value)
+            }} />
           <div className="pt-4">
-            <ButtonComponent label="Sign in" />
+            <ButtonComponent onClick={async()=>{
+              const response = await axios.post("http://localhost:1001/api/v1/user/signin",{
+                userName,
+                password
+              })
+              localStorage.setItem("token",response.data.token)
+              navigate('/dashboard')
+            }} label="Sign in" />
           </div>
           <BottomWarning
             to={"/signup"}

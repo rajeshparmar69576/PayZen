@@ -1,7 +1,6 @@
 const express = require("express");
-const { mongoose } = require("mongoose");
 const router = express.Router();
-const { z } = require("zod");
+const zod = require("zod");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../model/user.model");
@@ -9,34 +8,17 @@ const { AuthMiddleware } = require("../middleware/auth.middleware.js");
 const { Account } = require("../model/account.model.js");
 
 // zod userSchema
-const signupSchema = z.object({
-  firstName: z
-    .string()
-    .max(50, "first name must not exceed 50 characters")
-    .trim()
-    .nonempty("FisrtName is required"),
-  lastName: z
-    .string()
-    .max(50, "last name must not exceed 50 characters")
-    .trim()
-    .optional(),
-  password: z
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .max(50, "Password must not exceed 50 characters")
-    .nonempty("Password is required"),
-  userName: z
-    .string()
-    .email()
-    .trim()
-    .max(30, "Username must not exceed 30 characters")
-    .nonempty("Username is required"),
-});
+const signupBody = zod.object({
+userName: zod.string().email(),
+firstName: zod.string(),
+lastName: zod.string(),
+password: zod.string()
+})
 
 // route for sign up
 router.post("/signup", async (req, res) => {
   try {
-    const { success } = signupSchema.safeParse(req.body);
+    const { success } = signupBody.safeParse(req.body);
     if (!success) {
       return res.status(411).json({
         success: false,
@@ -90,45 +72,36 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-const signinSchema = z.object({
-    userName: z
-      .string()
-      .email()
-      .trim()
-      .max(30, "Username must not exceed 30 characters")
-      .nonempty("Username is required"),
-    password: z
-      .string()
-      .min(6, "Password must be at least 6 characters")
-      .max(50, "Password must not exceed 50 characters")
-      .nonempty("Password is required"),
-  });
-
+const signinBody = zod.object({
+userName: zod.string().email(),
+password: zod.string()
+})
 // route for signin
 router.post("/signin", async (req, res) => {
   try {
-    const success = signinSchema.safeParse(req.body);
-    if (!success) {
-      return res.status(401).json({
+    // SafeParse for input validation
+    const parsed = signinBody.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
         success: false,
         message: "Incorrect inputs",
+        errors: parsed.error.errors // Include the validation errors from Zod
       });
     }
 
     const { userName, password } = req.body;
 
-    const user = await User.findOne({userName});
-
+    // Find user by userName (email)
+    const user = await User.findOne({ userName });
     if (!user) {
-      return res.status(411).json({
+      return res.status(404).json({
         success: false,
-        message: "User not exist",
+        message: "User not found",
       });
     }
 
-    // check password is correct or not
+    // Compare the provided password with the stored hashed password
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
       return res.status(401).json({
         success: false,
@@ -137,7 +110,6 @@ router.post("/signin", async (req, res) => {
     }
 
     const userId = user._id;
-
     const token = jwt.sign({ userId }, process.env.JWT_SECRET);
 
     res.status(200).json({
@@ -149,34 +121,22 @@ router.post("/signin", async (req, res) => {
     console.error("Error while sign-in:", err.message);
     res.status(500).json({
       success: false,
-      message: err.message,
+      message: "Internal server error",
     });
   }
 });
 
 
-const updateSchema = z.object({
-  firstName: z
-    .string()
-    .max(50, "first name must not exceed 50 characters")
-    .trim()
-    .nonempty("FisrtName is required"),
-  lastName: z
-    .string()
-    .max(50, "last name must not exceed 50 characters")
-    .trim()
-    .optional(),
-  password: z
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .max(50, "Password must not exceed 50 characters")
-    .nonempty("Password is required")
+const updateBody = zod.object({
+  password: zod.string().optional(),
+  firstName: zod.string().optional(),
+  lastName: zod.string().optional(),
 });
 
 router.put('/',AuthMiddleware,async(req,res)=>{
   try{
 
-    const {success} = updateSchema.safeParse(req.body)
+    const {success} = updateBody.safeParse(req.body)
 
     if(!success){
       return res.status(401).json({
