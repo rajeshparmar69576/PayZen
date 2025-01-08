@@ -4,7 +4,6 @@ const zod = require("zod");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../model/user.model");
-const { AuthMiddleware } = require("../middleware/auth.middleware.js");
 const { Account } = require("../model/account.model.js");
 
 // zod userSchema
@@ -127,64 +126,6 @@ router.post("/signin", async (req, res) => {
 });
 
 
-const updateBody = zod.object({
-  password: zod.string().optional(),
-  firstName: zod.string().optional(),
-  lastName: zod.string().optional(),
-});
-
-router.put('/',AuthMiddleware,async(req,res)=>{
-  try{
-
-    const {success} = updateBody.safeParse(req.body)
-
-    if(!success){
-      return res.status(401).json({
-        success: false,
-        message: "Incorrect inputs",
-      });
-    }
-
-
-    const userId = req.userId
-    
-    const {firstName,lastName,password} = req.body;
-
-    let updatedData = {firstName,lastName}
-
-    if(password){
-      // hash the password
-      const salt = await bcrypt.genSalt(10)
-      const hahsedPassword = await bcrypt.hash(password,salt)
-      updatedData.password = hahsedPassword
-    }
-
-  
-    const updatedUser = await User.findByIdAndUpdate(userId,updatedData,{new:true})
-
-    if (!updatedUser) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
-    }
-
-    res.status(200).json({
-      success:true,
-      message:'Data updated sucessfully',
-      updatedData:updatedUser
-    })
-  }catch(err){
-    console.error("Error while updating data:", err.message);
-    res.status(500).json({
-      success: false,
-      message: err.message,
-    });
-  }
-})
-
-module.exports = router;
-
 
 // route to get users detail with filter
 router.get('/bulk',async(req,res)=>{
@@ -212,3 +153,6 @@ router.get('/bulk',async(req,res)=>{
   })
 })
 
+
+
+module.exports = router;
