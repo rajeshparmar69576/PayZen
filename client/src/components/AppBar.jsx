@@ -5,8 +5,7 @@ const AppBar = () => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("userInfo")
+        localStorage.removeItem("token");
         navigate('/')
     }
   return (
