@@ -38,7 +38,8 @@ const Signup = () => {
           }} type="password" label="Password" />
           <div className="pt-4">
             <ButtonComponent onClick={async()=>{
-              const response = await axios.post("http://localhost:1001/api/v1/user/signup",{
+              const API_URL = import.meta.env.VITE_API_URL;
+              const response = await axios.post(`${API_URL}/api/v1/user/signup`,{
                 userName,
                 firstName,
                 lastName,
