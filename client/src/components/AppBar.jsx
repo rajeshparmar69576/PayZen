@@ -1,18 +1,32 @@
 import React from 'react'
+import { Link,useNavigate } from 'react-router-dom'
 
 const AppBar = () => {
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userInfo")
+        navigate('/')
+    }
   return (
-    <div className='shadow h-14 flex justify-between'>
-        <div>PayZen App</div>
-        <div className='flex'>
-            <div className='flex flex-col justify-center h-full mr-4 '>
-                Hello
-            </div>
-            <div className='rounded-full h-12 w-12 bg-slate-200 flex justify-center mt-1 mr-2'>
-                <div className='flex flex-col justify-center h-full text-xl'>
-                    U
-                </div>
-            </div>
+    <div className='shadow h-16 flex justify-between items-center px-6 bg-white'>
+        <div className='text-2xl font-semibold text-blue-600'>PayZen App</div>
+
+        <div className='flex items-center space-x-6'>
+            <Link to="/home" className='text-lg hover:text-blue-500'>
+                Home
+            </Link>
+            <Link to="/dashboard" className='text-lg hover:text-blue-500'>
+                Dashboard
+            </Link>
+
+            <button
+                onClick={handleLogout}
+                className='bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600'  
+            >
+                Logout
+            </button>
         </div>
     </div>
   )
