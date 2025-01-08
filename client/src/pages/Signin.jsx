@@ -41,7 +41,7 @@ const Signin = () => {
                 password
               })
               localStorage.setItem("token",response.data.token)
-              navigate('/dashboard')
+              navigate('/home')
             }} label="Sign in" />
           </div>
           <BottomWarning
