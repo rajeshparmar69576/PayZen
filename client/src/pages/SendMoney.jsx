@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import {useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
 
@@ -7,8 +7,9 @@ const SendMoney = () => {
   const id = searchParams.get("id");
   const name = searchParams.get("name");
   const [amount, setAmount] = useState(0);
-  const [notification, setNotification] = useState(""); // State to manage notification messages
-  const [isError, setIsError] = useState(false); // State to manage error status
+  const [notification, setNotification] = useState(""); 
+  const [isError, setIsError] = useState(false);
+  const navigate = useNavigate() 
 
   const handleTransaction = async () => {
     const API_URL = import.meta.env.VITE_API_URL;
@@ -29,13 +30,16 @@ const SendMoney = () => {
       // Check if the transaction was successful
       if (response.status === 200) {
         setNotification("Transaction successful! Money sent to " + name);
-        setIsError(false); // Reset error state
+        setIsError(false); 
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1500);
       }
     } catch (error) {
       setNotification(
         error.response?.data?.message || "Transaction failed. Please try again."
       );
-      setIsError(true); // Set error state
+      setIsError(true); 
     }
   };
 
